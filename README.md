@@ -1,4 +1,4 @@
-# Cofee Shop
+# Coffee Shop
 A complex Coffee Shop system intended as an exploration of domain-driven design
 
 This is a project proposal for the 2021 Domain Driven Design class taught by Stuart Williams (@stuart-williams-magenic), Larry Smithmier (@lsmithmier), Jason Weber (@jasonw-magenic), and Rocky Lhotka (@rockfordlhotka). It is inspired by the examples described in REST in Practice by Jim Webber, Savas Parastatidis, and Ian Robinson, but is intended to add complexity for a full exploration of DDD. The subject is a state-of-the-art IT system for managing a coffee shop business. This system will address complex and interrelated business concerns, including:
