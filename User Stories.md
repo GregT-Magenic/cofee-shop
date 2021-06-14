@@ -26,10 +26,22 @@ A barista is a front-line employee of the coffee shop locations. They want to pr
 6. I place the prepared items at the pickup location
 7. I notify the Customer that their order is ready for pickup
 8. I clock out
+9. I wait for paychecks
+10. I cash paychecks when I receive them
 
-## Coffee Shop manager
+## Retail Manager
 
-Each coffee shop location has a management team in charge of inventory, finance, and marketing
+Each coffee shop location has a management team in charge of inventory, employees, finance, and marketing. They want a profitable business.
 
-1. 
-
+1. I review existing inventory levels to make supplier purchase decisions
+2. I place orders (order summary?) with suppliers so that I can replenish inventory
+3. I review the bill for a placed order
+4. I pay the bill with 0 or more payment options
+5. I wait for supplier deliveries
+6. I place received deliveries in inventory
+7. I pay Baristas for their hours worked
+8. I set the menu items
+9. I set the prices for menu items
+10. I review store cash balances (from customer payments)
+11. I review customer marketing contact information
+12. I send marketing offers to customers 
