@@ -44,4 +44,13 @@ Each coffee shop location has a management team in charge of inventory, employee
 9. I set the prices for menu items
 10. I review store cash balances (from customer payments)
 11. I review customer marketing contact information
-12. I send marketing offers to customers 
+12. I send marketing offers to customers
+
+## Supplier
+
+Suppliers want to deliver products to one or more stores in exchange for payments
+
+1. I review my existing inventory quantities
+2. I create an available inventory list with prices and quantities
+3. I wait for inventory orders and payment
+4. I deliver inventory orders when they are paid
