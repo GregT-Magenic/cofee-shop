@@ -1,23 +1,100 @@
 @startuml
 
-title Relationships - Class Diagram
+title Coffee Shop Model
 
+namespace ordering {
 
-class Dwelling {
-  +Int Windows
-  +void LockTheDoor()
+  class Order {
+    +id: integer
+    void addOrderItem(menuItem: MenuItem, quantity: integer, specialInstructions: String)
+    void removeOrderItem(OrderItem orderItem)
+    void submitForPayment()
+    void cancel()
+    CurrencyValue calculatePrice()
+  }
+  Order *-- "0..*" OrderItem
+  Order o-- "0..1" Customer
+  Order o-- "0..*" Promotions
+  Order .. "1" OrderStatus: uses
+
+  class OrderSubmittedForPayment <<event>> {
+    +orderId: integer
+    +calculatePrice: CurrencyValue
+  }
+
+  enum OrderStatus {
+    RECEIVING
+    PAYMENT_PENDING
+    PAID
+    READY
+    COMPLETE
+    CANCELLED
+  }
+  note "Orders are created in the RECEIVING status.\nsubmitForPayment() moves them to\nPAYMENT_PENDING they can no longer be\nupdated, but they can be reverted back to\nRECEIVING status. The order system waits\nfor an OrderPaid event to transition to PAID,\nand waits for OrderPrepared events for all\nthe OrderItems. Orders in RECEIVING status\ncan be cancelled" as n1
+  OrderStatus .. n1
+
+  class Customer {
+    +id: integer
+  }
+
+  class OrderItem {
+    +id: integer
+    +specialInstructions: String
+    +quantity: integer
+  }
+  OrderItem o-- "1" MenuItem
+  OrderItem *-- "1" Size
+
+  MenuItem *-- "1..*" FoodBeverage
+  MenuItem *-- "1..*" PricingOffer
+
+    class FoodBeverage {
+    +name: String
+    +description: String
+  }
+
+  class PricingOffer {
+    +name: String
+  }
+  PricingOffer *-- "1" Size
+  PricingOffer *-- "1" CurrencyValue
+
+  class Size {
+    +quanity: BigDecimal
+  }
+  Size .. "1" MeasurementUnit: uses
+
+  enum MeasurementUnit {
+    PIECES
+    KILOGRAMS
+    POUNDS
+    LITRES
+    FLUID_OUNCE
+  }
+
+  class CurrencyValue {
+    +quanity: BigDecimal
+  }
+  CurrencyValue .. "1" Currency: uses
+
+  enum Currency {
+    US_DOLLAR
+    MEXICAN_PESO
+    BITCOIN
+  }
+
 }
 
-class Apartment
-class House
-class Commune
-class Window
-class Door
+namespace payment {
 
-Dwelling <|-down- Apartment: Inheritance
-Dwelling <|-down- Commune: Inheritance
-Dwelling <|-down- House: Inheritance
-Dwelling "1" *-up- "many" Window: Composition
-Dwelling "1" *-up- "many" Door: Composition
+  note "TODO payment processing" as n1
+
+}
+
+namespace kitchen {
+
+  note "TODO food and beverage order preparation" as n1
+
+}
 
 @enduml
