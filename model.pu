@@ -97,4 +97,16 @@ namespace kitchen {
 
 }
 
+namespace supplier {
+
+  note "TODO supplier" as n1
+
+}
+
+namespace management {
+
+  note "TODO management" as n1
+
+}
+
 @enduml
