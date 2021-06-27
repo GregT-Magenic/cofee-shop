@@ -28,17 +28,41 @@ namespace shared_kernel {
     BITCOIN
   }
 
-    class OrderSubmitted <<event>> {
+  class OrderStatusUpdated <<event>> {
     +orderId: integer
-    +calculatePrice: CurrencyValue
+    +dateTime: ZonedDateTime
+  }
+  OrderStatusUpdated .. "1" OrderStatus: uses
+
+  enum OrderStatus {
+    RECEIVING
+    SUBMITTED
+    CANCELLED
+  }
+
+  class BillStatusUpdated <<event>> {
+    +billId: integer
+    +orderId: integer
+    +dateTime: ZonedDateTime
+  }
+  BillStatusUpdated .. "1" BillStatus: uses
+
+  enum BillStatus {
+    RECEIVING
+    PAID
+    CANCELLED
   }
 
 }
 
 namespace ordering {
 
+  class Menu {}
+  Menu o-- "0..*" MenuItem
+
   class Order {
     +id: integer
+    +customerName: String
     void addOrderItem(menuItem: MenuItem, quantity: integer, specialInstructions: String)
     void removeOrderItem(OrderItem orderItem)
     void submitForPayment()
@@ -46,18 +70,7 @@ namespace ordering {
     CurrencyValue calculatePrice()
   }
   Order *-- "0..*" OrderItem
-  Order o-- "0..1" Customer
-  Order o-- "0..*" Promotions
-  Order .. "1" OrderStatus: uses
-
-  enum OrderStatus {
-    RECEIVING
-    SUBMITTED
-  }
-
-  class Customer {
-    +id: integer
-  }
+  Order .. "1" shared_kernel.OrderStatus: uses
 
   class OrderItem {
     +id: integer
@@ -85,7 +98,29 @@ namespace ordering {
 
 namespace payment {
 
-  note "TODO payment processing" as n1
+  class Bill {
+    +id: integer
+    void addPayment(currencyValue: shared_kernel.CurrencyValue, paymentMethod: PAYMENT_METHOD)
+    void removePayment(payment: Payment)
+    void processPayments()
+    void cancel()
+  }
+  Bill o-- "1" ordering.Order
+  Bill o-- "1" shared_kernel.CurrencyValue
+  Bill *-- "1..*" Payment
+  Bill .. "1" shared_kernel.BillStatus: uses
+
+  class Payment {
+  }
+  Payment o-- "1" shared_kernel.CurrencyValue
+  Payment .. "1" PAYMENT_METHOD: uses
+
+  enum PAYMENT_METHOD {
+    CASH
+    VISA
+    PAYPAL
+    STORE_CREDIT
+  }
 
 }
 
