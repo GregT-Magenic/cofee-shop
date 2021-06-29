@@ -4,10 +4,10 @@ title Coffee Shop Model
 
 namespace shared_kernel {
 
-  class Amount {
+  class Size {
     +quanity: BigDecimal
   }
-  Amount .. "1" MeasurementUnit: uses
+  Size .. "1" MeasurementUnit: uses
 
   enum MeasurementUnit {
     PIECES
@@ -53,9 +53,29 @@ namespace shared_kernel {
     CANCELLED
   }
 
+  class KitchenOrderStatusUpdated <<event>> {
+    +kitchenOrderId: integer
+    +orderId: integer
+    +dateTime: ZonedDateTime
+  }
+  KitchenOrderStatusUpdated .. "1" KitchenStatus: uses
+
+  enum KitchenStatus {
+    PENDING
+    PREPARING
+    READY
+  }
+
 }
 
 namespace ordering {
+
+  class CoffeeShop {
+    +id: integer
+    +name: String
+  }
+  CoffeeShop *-- "0..*" Menu
+  CoffeeShop *-- "0..*" Order
 
   class Menu {}
   Menu o-- "0..*" MenuItem
@@ -63,6 +83,7 @@ namespace ordering {
   class Order {
     +id: integer
     +customerName: String
+    +status: shared_kernel.OrderStatus
     void addOrderItem(menuItem: MenuItem, quantity: integer, specialInstructions: String)
     void removeOrderItem(OrderItem orderItem)
     void submitForPayment()
@@ -70,15 +91,14 @@ namespace ordering {
     CurrencyValue calculatePrice()
   }
   Order *-- "0..*" OrderItem
-  Order .. "1" shared_kernel.OrderStatus: uses
 
   class OrderItem {
     +id: integer
     +specialInstructions: String
     +quantity: integer
+    +size: shared_kernel.Size
   }
   OrderItem o-- "1" MenuItem
-  OrderItem *-- "1" shared_kernel.Amount
 
   MenuItem *-- "1..*" FoodBeverage
   MenuItem *-- "1..*" PricingOffer
@@ -90,9 +110,9 @@ namespace ordering {
 
   class PricingOffer {
     +name: String
+    +size: shared_kernel.Size
+    +currencyValue: shared_kernel.CurrencyValue
   }
-  PricingOffer *-- "1" shared_kernel.Amount
-  PricingOffer *-- "1" shared_kernel.CurrencyValue
 
 }
 
@@ -100,33 +120,67 @@ namespace payment {
 
   class Bill {
     +id: integer
+    +currencyValue: shared_kernel.CurrencyValue
+    +status: shared_kernel.BillStatus: uses
     void addPayment(currencyValue: shared_kernel.CurrencyValue, paymentMethod: PAYMENT_METHOD)
     void removePayment(payment: Payment)
     void processPayments()
     void cancel()
   }
   Bill o-- "1" ordering.Order
-  Bill o-- "1" shared_kernel.CurrencyValue
   Bill *-- "1..*" Payment
-  Bill .. "1" shared_kernel.BillStatus: uses
 
   class Payment {
+    +currencyValue: shared_kernel.CurrencyValue
+    +id: integer
   }
-  Payment o-- "1" shared_kernel.CurrencyValue
-  Payment .. "1" PAYMENT_METHOD: uses
+  Payment *-- "1" PaymentMethod
 
-  enum PAYMENT_METHOD {
-    CASH
-    VISA
-    PAYPAL
-    STORE_CREDIT
+  interface PaymentMethod {
+    void process()
   }
+
+  class Cash implements PaymentMethod {
+    void process()
+  }
+
+  class Visa implements PaymentMethod  {
+    +accountNumber: String
+    +securityCode: String
+    +expirationDate: Date
+    void process()
+  }
+  Visa .. "1" VisaPaymentProcessingACL: integration
+
+  interface VisaPaymentProcessingACL
 
 }
 
+
+
 namespace kitchen {
 
-  note "TODO food and beverage order preparation" as n1
+  class Order {
+    +id: integer
+  }
+  Order o-- "1" ordering.Order
+  Order *-- "0..*" OrderItem
+
+  class OrderItem {
+    +quantity: integer
+    +size: shared_kernel.Size
+    +status: shared_kernel.KitchenStatus
+    void setReady()
+  }
+
+  OrderItem o-- "1" Recipe
+
+  class Recipe
+
+  class Storage?
+
+
+
 
 }
 
