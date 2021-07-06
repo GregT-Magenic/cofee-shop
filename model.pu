@@ -73,9 +73,29 @@ namespace ordering {
   class CoffeeShop {
     +id: integer
     +name: String
+
+    Menu createMenu()
+    void addMenuItem(toMenu: Menu, foodBeverages: FoodBeverage[], pricingOffers: PricingOffer[])
+    void removeMenuItem(fromMenu: Menu, menuItem: MenuItem)
+    void deleteMenu(Menu)
+
+    Order createOrder()
+    void addOrderItem(toOrder: Order, menuItem: MenuItem, quantity: integer, specialInstructions: String)
+    void removeOrderItem(fromOrder: Order, orderItem: OrderItem)
+    CurrencyValue calculatePrice(order: Order)
+    void submitForPayment(order: Order) emits shared_kernel.OrderStatusUpdated
+    void cancelOrder(order: Order)
   }
+
+  note right
+    should coffee shop attempt
+    to synchronize/validate menu
+    items with kitchen capability?
+  end note
+
   CoffeeShop *-- "0..*" Menu
   CoffeeShop *-- "0..*" Order
+  
 
   class Menu {}
   Menu o-- "0..*" MenuItem
@@ -84,11 +104,6 @@ namespace ordering {
     +id: integer
     +customerName: String
     +status: shared_kernel.OrderStatus
-    void addOrderItem(menuItem: MenuItem, quantity: integer, specialInstructions: String)
-    void removeOrderItem(OrderItem orderItem)
-    void submitForPayment()
-    void cancel()
-    CurrencyValue calculatePrice()
   }
   Order *-- "0..*" OrderItem
 
@@ -107,6 +122,10 @@ namespace ordering {
     +name: String
     +description: String
   }
+
+  note right
+    should this reference a kitchen object?
+  end note
 
   class PricingOffer {
     +name: String
