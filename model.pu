@@ -28,42 +28,25 @@ namespace shared_kernel {
     BITCOIN
   }
 
-  class OrderStatusUpdated <<event>> {
+  class OrderPlaced <<event>> {
+    +coffeeShopId: integer
+    +orderId: integer
+    +currencyValue: CurrencyValue
+    +items: ordering.MenuItem[]
+    +dateTime: ZonedDateTime
+  }
+
+  class OrderPaid <<event>> {
+    +coffeeShopId: integer
     +orderId: integer
     +dateTime: ZonedDateTime
   }
-  OrderStatusUpdated .. "1" OrderStatus: uses
 
-  enum OrderStatus {
-    RECEIVING
-    SUBMITTED
-    CANCELLED
-  }
-
-  class BillStatusUpdated <<event>> {
-    +billId: integer
-    +orderId: integer
-    +dateTime: ZonedDateTime
-  }
-  BillStatusUpdated .. "1" BillStatus: uses
-
-  enum BillStatus {
-    RECEIVING
-    PAID
-    CANCELLED
-  }
-
-  class KitchenOrderStatusUpdated <<event>> {
+  class OrderReadyForCustomer <<event>> {
     +kitchenOrderId: integer
+    +coffeeShopId: integer
     +orderId: integer
     +dateTime: ZonedDateTime
-  }
-  KitchenOrderStatusUpdated .. "1" KitchenStatus: uses
-
-  enum KitchenStatus {
-    PENDING
-    PREPARING
-    READY
   }
 
 }
@@ -83,14 +66,12 @@ namespace ordering {
     void addOrderItem(toOrder: Order, menuItem: MenuItem, quantity: integer, specialInstructions: String)
     void removeOrderItem(fromOrder: Order, orderItem: OrderItem)
     CurrencyValue calculatePrice(order: Order)
-    void submitForPayment(order: Order) emits shared_kernel.OrderStatusUpdated
+    void submitForPayment(order: Order)
     void cancelOrder(order: Order)
   }
 
-  note right
-    should coffee shop attempt
-    to synchronize/validate menu
-    items with kitchen capability?
+  note left of CoffeeShop::submitForPayment
+    emits shared_kernel.OrderPlaced
   end note
 
   CoffeeShop *-- "0..*" Menu
@@ -103,9 +84,15 @@ namespace ordering {
   class Order {
     +id: integer
     +customerName: String
-    +status: shared_kernel.OrderStatus
   }
   Order *-- "0..*" OrderItem
+  Order *-- "1" OrderStatus
+
+  enum OrderStatus {
+    RECEIVING
+    SUBMITTED
+    CANCELLED
+  }
 
   class OrderItem {
     +id: integer
@@ -118,14 +105,11 @@ namespace ordering {
   MenuItem *-- "1..*" FoodBeverage
   MenuItem *-- "1..*" PricingOffer
 
-    class FoodBeverage {
+  class FoodBeverage {
     +name: String
     +description: String
   }
-
-  note right
-    should this reference a kitchen object?
-  end note
+  FoodBeverage o-- "1" kitchen.Recipe
 
   class PricingOffer {
     +name: String
@@ -137,17 +121,36 @@ namespace ordering {
 
 namespace payment {
 
+  class PaymentProcessor {
+    +id: integer
+    void addPayment(toBill: Bill, currencyValue: shared_kernel.CurrencyValue, paymentMethod: PAYMENT_METHOD)
+    void removePayment(fromBill: Bill, payment: Payment)
+    void processPayments(forBill: Bill)
+    void cancel(bill: Bill)
+  }
+  PaymentProcessor *-- "0..*" Bill
+
+  note bottom of PaymentProcessor
+    creates Bill on sharedKernel.OrderPlaced
+  end note
+
+  note left of PaymentProcessor::processPayments
+    emits shared_kernel.OrderPaid
+  end note
+
   class Bill {
     +id: integer
     +currencyValue: shared_kernel.CurrencyValue
-    +status: shared_kernel.BillStatus: uses
-    void addPayment(currencyValue: shared_kernel.CurrencyValue, paymentMethod: PAYMENT_METHOD)
-    void removePayment(payment: Payment)
-    void processPayments()
-    void cancel()
   }
   Bill o-- "1" ordering.Order
   Bill *-- "1..*" Payment
+  Bill o-- "1" BillStatus
+
+  enum BillStatus {
+    RECEIVING
+    PAID
+    CANCELLED
+  }
 
   class Payment {
     +currencyValue: shared_kernel.CurrencyValue
@@ -179,6 +182,20 @@ namespace payment {
 
 namespace kitchen {
 
+  class Kitchen {
+    id: integer
+  }
+  Kitchen *-- "0..*" Order
+
+  note left of Kitchen
+    emits shared_kernel.OrderReadyForCustomer
+  end note
+
+  note bottom of Kitchen
+    creates Order on sharedKernel.OrderPlaced
+    AND sharedKernel.orderPaid
+  end note
+
   class Order {
     +id: integer
   }
@@ -188,18 +205,20 @@ namespace kitchen {
   class OrderItem {
     +quantity: integer
     +size: shared_kernel.Size
-    +status: shared_kernel.KitchenStatus
     void setReady()
   }
-
   OrderItem o-- "1" Recipe
+  OrderItem o-- "1" KitchenStatus
 
-  class Recipe
+  enum KitchenStatus {
+    PENDING
+    PREPARING
+    READY
+  }
 
-  class Storage?
-
-
-
+  class Recipe {
+    +id: integer
+  }
 
 }
 
