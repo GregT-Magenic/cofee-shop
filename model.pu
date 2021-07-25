@@ -85,6 +85,8 @@ namespace ordering {
   Location o-- "1..*" kitchen.Kitchen
   
 
+  class Menu {
+    +id: integer
     void addMenuItem(toMenu: Menu, foodBeverages: FoodBeverage[], pricingOffers: PricingOffer[])
     void removeMenuItem(fromMenu: Menu, menuItem: MenuItem)
   }
