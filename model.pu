@@ -119,67 +119,6 @@ namespace ordering {
 
 }
 
-namespace payment {
-
-  class PaymentProcessor {
-    +id: integer
-    void addPayment(toBill: Bill, currencyValue: shared_kernel.CurrencyValue, paymentMethod: PAYMENT_METHOD)
-    void removePayment(fromBill: Bill, payment: Payment)
-    void processPayments(forBill: Bill)
-    void cancel(bill: Bill)
-  }
-  PaymentProcessor *-- "0..*" Bill
-
-  note bottom of PaymentProcessor
-    creates Bill on sharedKernel.OrderPlaced
-  end note
-
-  note left of PaymentProcessor::processPayments
-    emits shared_kernel.OrderPaid
-  end note
-
-  class Bill {
-    +id: integer
-    +currencyValue: shared_kernel.CurrencyValue
-  }
-  Bill o-- "1" ordering.Order
-  Bill *-- "1..*" Payment
-  Bill o-- "1" BillStatus
-
-  enum BillStatus {
-    RECEIVING
-    PAID
-    CANCELLED
-  }
-
-  class Payment {
-    +currencyValue: shared_kernel.CurrencyValue
-    +id: integer
-  }
-  Payment *-- "1" PaymentMethod
-
-  interface PaymentMethod {
-    void process()
-  }
-
-  class Cash implements PaymentMethod {
-    void process()
-  }
-
-  class Visa implements PaymentMethod  {
-    +accountNumber: String
-    +securityCode: String
-    +expirationDate: Date
-    void process()
-  }
-  Visa .. "1" VisaPaymentProcessingACL: integration
-
-  interface VisaPaymentProcessingACL
-
-}
-
-
-
 namespace kitchen {
 
   class Kitchen {
@@ -222,16 +161,28 @@ namespace kitchen {
 
 }
 
-namespace supplier {
-
-  note "TODO supplier" as n1
-
+namespace payment #LightGrey {
+  note "generic subdomain" as n1 #LightGrey
 }
 
-namespace management {
+namespace inventory #LightGrey {
+  note "generic subdomain" as n1 #LightGrey
+}
 
-  note "TODO management" as n1
+namespace suppliers #LightGrey {
+  note "generic subdomain" as n1 #LightGrey
+}
 
+namespace workforce_management #LightGrey {
+  note "generic subdomain" as n1 #LightGrey
+}
+
+namespace accounting #LightGrey {
+  note "generic subdomain" as n1 #LightGrey
+}
+
+namespace marketing #LightGrey {
+  note "generic subdomain" as n1 #LightGrey
 }
 
 @enduml
