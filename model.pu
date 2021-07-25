@@ -154,7 +154,6 @@ namespace kitchen {
 
   note bottom of Kitchen
     creates Order on sharedKernel.OrderPlaced
-    AND sharedKernel.orderPaid
   end note
 
   class Order {
