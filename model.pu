@@ -71,16 +71,9 @@ namespace ordering {
     +name: String
 
     Menu createMenu()
-    void addMenuItem(toMenu: Menu, foodBeverages: FoodBeverage[], pricingOffers: PricingOffer[])
-    void removeMenuItem(fromMenu: Menu, menuItem: MenuItem)
     void deleteMenu(Menu)
 
     Order createOrder()
-    void addOrderItem(toOrder: Order, menuItem: MenuItem, quantity: integer, specialInstructions: String)
-    void removeOrderItem(fromOrder: Order, orderItem: OrderItem)
-    CurrencyValue calculatePrice(order: Order)
-    void submitForPayment(order: Order)
-    void cancelOrder(order: Order)
   }
 
   note left of Location::submitForPayment
@@ -92,12 +85,19 @@ namespace ordering {
   Location o-- "1..*" kitchen.Kitchen
   
 
-  class Menu {}
+    void addMenuItem(toMenu: Menu, foodBeverages: FoodBeverage[], pricingOffers: PricingOffer[])
+    void removeMenuItem(fromMenu: Menu, menuItem: MenuItem)
+  }
   Menu o-- "0..*" MenuItem
 
   class Order {
     +id: integer
     +customerName: String
+    void addOrderItem(toOrder: Order, menuItem: MenuItem, quantity: integer, specialInstructions: String)
+    void removeOrderItem(fromOrder: Order, orderItem: OrderItem)
+    CurrencyValue calculatePrice(order: Order)
+    void submitForPayment(order: Order)
+    void cancelOrder(order: Order)
   }
   Order *-- "0..*" OrderItem
   Order *-- "1" OrderStatus
