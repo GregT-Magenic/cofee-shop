@@ -4,6 +4,11 @@ title Coffee Shop Model
 
 namespace shared_kernel {
 
+  enum UbiquitousLanguage #White {
+    Size: a physical amount of something in MeasurementUnits
+    CurrencyValue: some amount of a given currency
+  }
+
   class Size {
     +quanity: BigDecimal
   }
@@ -29,7 +34,7 @@ namespace shared_kernel {
   }
 
   class OrderPlaced <<event>> {
-    +coffeeShopId: integer
+    +locationId: integer
     +orderId: integer
     +currencyValue: CurrencyValue
     +items: ordering.MenuItem[]
@@ -37,14 +42,14 @@ namespace shared_kernel {
   }
 
   class OrderPaid <<event>> {
-    +coffeeShopId: integer
+    +locationId: integer
     +orderId: integer
     +dateTime: ZonedDateTime
   }
 
   class OrderReadyForCustomer <<event>> {
     +kitchenOrderId: integer
-    +coffeeShopId: integer
+    +locationId: integer
     +orderId: integer
     +dateTime: ZonedDateTime
   }
@@ -53,7 +58,15 @@ namespace shared_kernel {
 
 namespace ordering {
 
-  class CoffeeShop {
+  enum UbiquitousLanguage #White {
+    Location: the physical restaurant where an order may be placed
+    Menu: A list of menu items that may change over time
+    Order: A list of order items for a customer, may change before the order is placed
+    FoodBeverage: Something that a customer might order from a coffee shop, e.g. coffee
+    PricingOffer: The price for which a given quantity of FoodBeverage may be purchased
+  }
+
+  class Location {
     +id: integer
     +name: String
 
@@ -70,12 +83,13 @@ namespace ordering {
     void cancelOrder(order: Order)
   }
 
-  note left of CoffeeShop::submitForPayment
+  note left of Location::submitForPayment
     emits shared_kernel.OrderPlaced
   end note
 
-  CoffeeShop *-- "0..*" Menu
-  CoffeeShop *-- "0..*" Order
+  Location *-- "0..*" Menu
+  Location *-- "0..*" Order
+  Location o-- "1..*" kitchen.Kitchen
   
 
   class Menu {}
@@ -120,6 +134,12 @@ namespace ordering {
 }
 
 namespace kitchen {
+
+  enum UbiquitousLanguage #White {
+    Kitchen: the physical location where an order may be prepared for the customer
+    Order: A list of order items for a customer
+    Recipe: the instructions for preparing an OrderItem
+  }
 
   class Kitchen {
     id: integer
